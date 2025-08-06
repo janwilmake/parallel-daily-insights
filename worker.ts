@@ -1,4 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
+
 import tasks from "./tasks.json";
 export interface Env {
   PARALLEL_API_KEY: string;
@@ -25,7 +26,7 @@ interface TaskResult {
   error?: string;
 }
 
-const TASKS: Task[] = tasks;
+const TASKS: Task[] = tasks.tasks;
 export default {
   async fetch(
     request: Request,
