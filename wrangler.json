@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
+  "name": "parallel-daily-insights",
+  "main": "worker.ts",
+  "compatibility_date": "2025-01-27",
+  "observability": { "logs": { "enabled": true } },
+  "triggers": {
+    "crons": ["0 3 * * *"]
+  },
+  "vars": {
+    "WEBHOOK_URL": "https://parallel-daily-insights.wilmake.workers.dev/webhook"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "TASK_RESULTS",
+      "id": "68b24836e5354bfcbcf43202c65db332"
+    }
+  ]
+}
