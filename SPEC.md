@@ -21,7 +21,7 @@ Recurring Tasks Using cronjobs and KV
 - uses webhook callback to store result in kv. the new result every day overwrites the previous. NB: use /v1beta appropriately. use the Web Crypto API for verification.
 - make result of each example available at /{slug}
 - list all on homepage in simple html at /
-- Uses env.PARALLEL_API_KEY
+- Uses env.PARALLEL_API_KEY for the API and as webhook secret
 
 Focus on 5 examples inspired by these: https://pastebin.contextarea.com/evCgBln.md but that likely have different results every day. first, generate a JSON for this. Ensure to use the same format of schema definition as the API requires.
 
