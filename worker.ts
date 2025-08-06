@@ -1,6 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import tasks from "./tasks.json";
+
 export interface Env {
   PARALLEL_API_KEY: string;
   TASK_RESULTS: KVNamespace;
@@ -26,7 +27,30 @@ interface TaskResult {
   error?: string;
 }
 
+interface WebhookPayload {
+  timestamp: string;
+  type: string;
+  data: {
+    run_id: string;
+    status: "completed" | "failed";
+    is_active: boolean;
+    warnings?: any;
+    error?: {
+      message: string;
+      details?: string;
+    };
+    processor: string;
+    metadata?: {
+      task_slug?: string;
+      [key: string]: any;
+    };
+    created_at: string;
+    modified_at: string;
+  };
+}
+
 const TASKS: Task[] = tasks.tasks;
+
 export default {
   async fetch(
     request: Request,
@@ -85,90 +109,219 @@ export default {
   },
 } satisfies ExportedHandler<Env>;
 
+async function verifyWebhookSignature(
+  body: string,
+  secret: string,
+  headerSignature: string,
+  webhookId: string,
+  webhookTimestamp: string
+): Promise<boolean> {
+  try {
+    // Create the payload string: webhook_id.timestamp.body
+    const payload = `${webhookId}.${webhookTimestamp}.${body}`;
+
+    // Import the secret as a key
+    const key = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    // Generate HMAC-SHA256 signature
+    const signature = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      new TextEncoder().encode(payload)
+    );
+
+    // Convert to base64url format (URL-safe base64 without padding)
+    const signatureArray = new Uint8Array(signature);
+    const base64 = btoa(String.fromCharCode(...signatureArray));
+    const base64url = base64
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
+
+    // Parse version and signature from header (format: "v1,<signature>")
+    const headerSignatures = headerSignature.split(" ");
+
+    for (const sig of headerSignatures) {
+      const [version, receivedSig] = sig.split(",", 2);
+      if (version === "v1" && receivedSig === base64url) {
+        return true;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Signature verification error:", error);
+    return false;
+  }
+}
+
 async function handleWebhook(request: Request, env: Env): Promise<Response> {
   try {
-    const payload = (await request.json()) as any;
+    const webhookId = request.headers.get("webhook-id");
+    const webhookTimestamp = request.headers.get("webhook-timestamp");
+    const webhookSignature = request.headers.get("webhook-signature");
 
-    if (
-      payload.type === "task_run.status" &&
-      payload.data.status === "completed"
-    ) {
-      const runId = payload.data.run_id;
+    if (!webhookId || !webhookTimestamp || !webhookSignature) {
+      console.error("Missing webhook headers");
+      return new Response("Missing required webhook headers", { status: 400 });
+    }
 
-      // Get the full result
-      const resultResponse = await fetch(
-        `https://api.parallel.ai/v1/tasks/runs/${runId}/result`,
-        {
-          headers: {
-            "x-api-key": env.PARALLEL_API_KEY,
-          },
-        }
-      );
+    // Verify timestamp is recent (within 5 minutes to prevent replay attacks)
+    const now = Math.floor(Date.now() / 1000);
+    const timestamp = parseInt(webhookTimestamp, 10);
+    if (Math.abs(now - timestamp) > 300) {
+      console.error("Webhook timestamp too old or too far in future");
+      return new Response("Invalid timestamp", { status: 400 });
+    }
 
-      if (resultResponse.ok) {
-        const resultData = await resultResponse.json();
+    const body = await request.text();
+    const secret = env.PARALLEL_API_KEY;
 
-        // Find which task this belongs to by checking metadata or other identifiers
-        // For now, we'll store with a generic key and let the manual trigger handle specific tasks
-        const taskSlug = payload.data.metadata?.task_slug;
-        if (taskSlug) {
-          const task = TASKS.find((t) => t.slug === taskSlug);
-          if (task) {
+    // Verify signature
+    const isValidSignature = await verifyWebhookSignature(
+      body,
+      secret,
+      webhookSignature,
+      webhookId,
+      webhookTimestamp
+    );
+
+    if (!isValidSignature) {
+      console.error("Invalid webhook signature");
+      return new Response("Invalid signature", { status: 401 });
+    }
+
+    const payload: WebhookPayload = JSON.parse(body);
+
+    // Handle task run status events
+    if (payload.type === "task_run.status") {
+      const { data } = payload;
+      const taskSlug = data.metadata?.task_slug;
+
+      if (!taskSlug) {
+        console.error("No task_slug in webhook metadata");
+        return new Response("OK", { status: 200 }); // Still return 200 to acknowledge
+      }
+
+      const task = TASKS.find((t) => t.slug === taskSlug);
+      if (!task) {
+        console.error(`Task not found for slug: ${taskSlug}`);
+        return new Response("OK", { status: 200 }); // Still return 200 to acknowledge
+      }
+
+      if (data.status === "completed") {
+        // Get the full result from the API
+        try {
+          const resultResponse = await fetch(
+            `https://api.parallel.ai/v1beta/tasks/runs/${data.run_id}/result`,
+            {
+              headers: {
+                "x-api-key": env.PARALLEL_API_KEY,
+              },
+            }
+          );
+
+          if (resultResponse.ok) {
+            const resultData = await resultResponse.json();
+
             const taskResult: TaskResult = {
               task,
-              result: resultData.output.content,
+              result: resultData.output?.content || resultData,
               lastUpdated: new Date().toISOString(),
               status: "completed",
             };
 
             await env.TASK_RESULTS.put(taskSlug, JSON.stringify(taskResult));
+            console.log(`Successfully stored result for task: ${taskSlug}`);
+          } else {
+            console.error(
+              `Failed to fetch result for run ${data.run_id}:`,
+              await resultResponse.text()
+            );
           }
+        } catch (error) {
+          console.error(`Error fetching result for run ${data.run_id}:`, error);
         }
+      } else if (data.status === "failed") {
+        // Store failed result
+        const taskResult: TaskResult = {
+          task,
+          result: null,
+          lastUpdated: new Date().toISOString(),
+          status: "failed",
+          error: data.error?.message || "Task execution failed",
+        };
+
+        await env.TASK_RESULTS.put(taskSlug, JSON.stringify(taskResult));
+        console.log(`Stored failed result for task: ${taskSlug}`);
       }
     }
 
-    return new Response("OK");
+    return new Response("OK", { status: 200 });
   } catch (error) {
-    console.error("Webhook error:", error);
-    return new Response("Error processing webhook", { status: 500 });
+    console.error("Webhook processing error:", error);
+    return new Response("Internal Server Error", { status: 500 });
   }
 }
 
 async function runAllTasks(env: Env): Promise<void> {
   const webhookUrl = env.WEBHOOK_URL;
 
+  console.log("Starting to run all tasks");
+
   for (const task of TASKS) {
     try {
-      const response = await fetch("https://api.parallel.ai/v1/tasks/runs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": env.PARALLEL_API_KEY,
+      const requestBody = {
+        task_spec: task.task_spec,
+        input: task.input,
+        processor: task.processor,
+        metadata: {
+          task_slug: task.slug,
         },
-        body: JSON.stringify({
-          task_spec: task.task_spec,
-          input: task.input,
-          processor: task.processor,
-          metadata: {
-            task_slug: task.slug,
+        webhook: {
+          url: webhookUrl,
+          event_types: ["task_run.status"],
+          ...(env.PARALLEL_API_KEY && { secret: env.PARALLEL_API_KEY }),
+        },
+      };
+
+      const response = await fetch(
+        "https://api.parallel.ai/v1beta/tasks/runs",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": env.PARALLEL_API_KEY,
           },
-          webhook: {
-            url: webhookUrl,
-            event_types: ["task_run.status"],
-          },
-        }),
-      });
+          body: JSON.stringify(requestBody),
+        }
+      );
 
       if (!response.ok) {
+        const errorText = await response.text();
         console.error(
           `Failed to start task ${task.slug}:`,
-          await response.text()
+          response.status,
+          errorText
+        );
+      } else {
+        const result = await response.json();
+        console.log(
+          `Successfully started task ${task.slug} with run ID: ${result.run_id}`
         );
       }
     } catch (error) {
       console.error(`Error starting task ${task.slug}:`, error);
     }
   }
+
+  console.log("Finished triggering all tasks");
 }
 
 async function handleTaskPage(task: Task, env: Env): Promise<Response> {
@@ -215,27 +368,51 @@ async function handleTaskPage(task: Task, env: Env): Promise<Response> {
         <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-semibold">Latest Results</h2>
-                <span class="text-sm text-gray-500 dark:text-gray-400">
-                    Updated: ${new Date(
-                      taskResult.lastUpdated
-                    ).toLocaleDateString()}
-                </span>
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-1 text-xs rounded-full ${
+                      taskResult.status === "completed"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                    }">
+                        ${taskResult.status}
+                    </span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                        Updated: ${new Date(
+                          taskResult.lastUpdated
+                        ).toLocaleDateString()}
+                    </span>
+                </div>
             </div>
             
-            ${Object.entries(taskResult.result)
-              .map(
-                ([key, value]) => `
-                <div class="mb-4">
-                    <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-2 capitalize">
-                        ${key.replace(/_/g, " ")}
-                    </h3>
-                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">${String(
-                      value
-                    )}</p>
+            ${
+              taskResult.status === "completed" && taskResult.result
+                ? Object.entries(taskResult.result)
+                    .map(
+                      ([key, value]) => `
+                    <div class="mb-4">
+                        <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-2 capitalize">
+                            ${key.replace(/_/g, " ")}
+                        </h3>
+                        <p class="text-gray-700 dark:text-gray-300 leading-relaxed">${String(
+                          value
+                        )}</p>
+                    </div>
+                `
+                    )
+                    .join("")
+                : taskResult.status === "failed"
+                ? `
+                <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p class="text-red-800 dark:text-red-200 font-medium">Task failed</p>
+                    ${
+                      taskResult.error
+                        ? `<p class="text-red-700 dark:text-red-300 mt-1">${taskResult.error}</p>`
+                        : ""
+                    }
                 </div>
-            `
-              )
-              .join("")}
+              `
+                : '<p class="text-gray-500 dark:text-gray-400">No results available.</p>'
+            }
         </div>
         `
             : `
@@ -320,20 +497,37 @@ async function handleHomepage(env: Env): Promise<Response> {
                         ${
                           result
                             ? `
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                Last updated: ${new Date(
-                                  result.lastUpdated
-                                ).toLocaleDateString()}
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-1 text-xs rounded-full ${
+                                  result.status === "completed"
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                }">
+                                    ${result.status}
+                                </span>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    ${new Date(
+                                      result.lastUpdated
+                                    ).toLocaleDateString()}
+                                </div>
                             </div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                ${
-                                  Object.values(result.result)[0]
-                                    ? String(
-                                        Object.values(result.result)[0]
-                                      ).substring(0, 150) + "..."
-                                    : "Results available"
-                                }
-                            </div>
+                            ${
+                              result.status === "completed" && result.result
+                                ? `<div class="text-sm text-gray-700 dark:text-gray-300">
+                                  ${
+                                    Object.values(result.result)[0]
+                                      ? String(
+                                          Object.values(result.result)[0]
+                                        ).substring(0, 150) + "..."
+                                      : "Results available"
+                                  }
+                                 </div>`
+                                : result.status === "failed"
+                                ? `<div class="text-sm text-red-600 dark:text-red-400">
+                                   ${result.error || "Task execution failed"}
+                                 </div>`
+                                : ""
+                            }
                         `
                             : `
                             <div class="text-sm text-yellow-600 dark:text-yellow-400">
