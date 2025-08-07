@@ -475,7 +475,7 @@ async function handleHomepage(env: Env): Promise<Response> {
                 <span class="font-black">parallel</span> daily insights
             </h1>
             <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto">
-                Automated daily research tasks powered by Parallel.ai. Fresh insights delivered every morning at 3 AM UTC.
+                Automated daily research tasks powered by Parallel.ai. Fresh insights delivered every morning at 3 AM UTC. Tasks are defined <a href="/tasks.json">here</a>
             </p>
         </header>
 

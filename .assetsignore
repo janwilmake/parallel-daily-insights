@@ -1,0 +1,5 @@
+.git
+.wrangler
+node_modules
+.dev.vars
+package-lock.json

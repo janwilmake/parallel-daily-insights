@@ -2,6 +2,7 @@
   "$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
   "name": "parallel-daily-insights",
   "main": "worker.ts",
+  "assets": { "directory": "./" },
   "compatibility_date": "2025-01-27",
   "observability": { "logs": { "enabled": true } },
   "triggers": {
