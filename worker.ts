@@ -203,7 +203,6 @@ async function handleWebhook(request: Request, env: Env): Promise<Response> {
     if (payload.type === "task_run.status") {
       const { data } = payload;
       const taskSlug = data.metadata?.task_slug;
-
       if (!taskSlug) {
         console.error("No task_slug in webhook metadata");
         return new Response("OK", { status: 200 }); // Still return 200 to acknowledge
@@ -219,7 +218,7 @@ async function handleWebhook(request: Request, env: Env): Promise<Response> {
         // Get the full result from the API
         try {
           const resultResponse = await fetch(
-            `https://api.parallel.ai/v1beta/tasks/runs/${data.run_id}/result`,
+            `https://api.parallel.ai/v1/tasks/runs/${data.run_id}/result`,
             {
               headers: {
                 "x-api-key": env.PARALLEL_API_KEY,
@@ -238,7 +237,10 @@ async function handleWebhook(request: Request, env: Env): Promise<Response> {
             };
 
             await env.TASK_RESULTS.put(taskSlug, JSON.stringify(taskResult));
-            console.log(`Successfully stored result for task: ${taskSlug}`);
+            console.log(
+              `Successfully stored result for task: ${taskSlug}`,
+              taskResult
+            );
           } else {
             console.error(
               `Failed to fetch result for run ${data.run_id}:`,
@@ -441,13 +443,13 @@ async function handleHomepage(env: Env): Promise<Response> {
   const results: Record<string, TaskResult> = {};
 
   for (const task of TASKS) {
-    const stored = await env.TASK_RESULTS.get(task.slug);
-    if (stored) {
-      try {
-        results[task.slug] = JSON.parse(stored);
-      } catch (error) {
-        console.error(`Error parsing result for ${task.slug}:`, error);
+    try {
+      const stored = await env.TASK_RESULTS.get<TaskResult>(task.slug, "json");
+      if (stored) {
+        results[task.slug] = stored;
       }
+    } catch (error) {
+      console.error(`Error parsing result for ${task.slug}:`, error);
     }
   }
 
