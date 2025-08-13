@@ -1,5 +1,5 @@
-NB: to use webhooks, you need to be in our beta first
+# Recurring Tasks Using cronjobs and KV
 
-If you want to use webhooks please contact support@parallel.ai
+See [SPEC](SPEC.md)
 
 Part of the [cookbook](https://github.com/parallel-web/parallel-cookbook)
