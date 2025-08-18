@@ -1,0 +1,348 @@
+@font-face {
+    font-family: 'FT System Mono';
+    src: url('/FTSystemMono-Regular.woff2') format('woff2'),
+         url('/FTSystemMono-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'FT System Mono';
+    src: url('/FTSystemMono-Medium.woff2') format('woff2'),
+         url('/FTSystemMono-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'FT System Mono';
+    src: url('/FTSystemMono-Semibold.woff2') format('woff2'),
+         url('/FTSystemMono-Semibold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'FT System Mono';
+    src: url('/FTSystemMono-Bold.woff2') format('woff2'),
+         url('/FTSystemMono-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Gerstner Programm';
+    src: url('/Gerstner-ProgrammRegular.woff2') format('woff2'),
+         url('/Gerstner-ProgrammRegular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Gerstner Programm';
+    src: url('/Gerstner-ProgrammMedium.woff2') format('woff2'),
+         url('/Gerstner-ProgrammMedium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --color-off-white: #fcfcfa;
+    --color-index-black: #1d1b16;
+    --color-neural: #d8d0bf;
+    --color-signal: #fb631b;
+    --color-signal-hover: #e55a18;
+    --color-signal-light: rgba(251, 99, 27, 0.1);
+    --color-success: #10b981;
+    --color-error: #ef4444;
+    --color-warning: #f59e0b;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'FT System Mono', monospace;
+    background-color: var(--color-off-white);
+    color: var(--color-index-black);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.logo {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
+}
+
+.title {
+    font-family: 'Gerstner Programm', serif;
+    font-size: 2.5rem;
+    font-weight: 500;
+    color: var(--color-index-black);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: var(--color-neural);
+    margin: 1rem 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+.card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    border-color: var(--color-signal);
+    box-shadow: 0 4px 12px rgba(251, 99, 27, 0.1);
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.card-title a {
+    color: var(--color-index-black);
+    text-decoration: none;
+}
+
+.card-title a:hover {
+    color: var(--color-signal);
+}
+
+.card-description {
+    color: var(--color-neural);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+}
+
+.status-completed {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+}
+
+.status-failed {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+}
+
+.status-pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+}
+
+.timestamp {
+    font-size: 0.75rem;
+    color: var(--color-neural);
+}
+
+.card-preview {
+    font-size: 0.875rem;
+    color: var(--color-index-black);
+    margin: 0.75rem 0;
+    line-height: 1.4;
+}
+
+.card-link {
+    color: var(--color-signal);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.card-link:hover {
+    color: var(--color-signal-hover);
+}
+
+.task-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.breadcrumb {
+    color: var(--color-signal);
+    text-decoration: none;
+    font-size: 0.875rem;
+    margin-bottom: 2rem;
+    display: inline-block;
+}
+
+.breadcrumb:hover {
+    color: var(--color-signal-hover);
+}
+
+.task-header {
+    margin-bottom: 2rem;
+}
+
+.task-title {
+    font-family: 'Gerstner Programm', serif;
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--color-index-black);
+    margin: 0 0 0.5rem 0;
+}
+
+.task-description {
+    color: var(--color-neural);
+    font-size: 1rem;
+}
+
+.results-container {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.results-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.results-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.result-item {
+    margin-bottom: 1.5rem;
+}
+
+.result-item:last-child {
+    margin-bottom: 0;
+}
+
+.result-label {
+    font-weight: 500;
+    color: var(--color-index-black);
+    margin-bottom: 0.5rem;
+    text-transform: capitalize;
+}
+
+.result-content {
+    color: var(--color-index-black);
+    line-height: 1.6;
+}
+
+.error-container {
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.error-title {
+    color: var(--color-error);
+    font-weight: 500;
+    margin: 0 0 0.5rem 0;
+}
+
+.error-message {
+    color: var(--color-error);
+    margin: 0;
+}
+
+.no-results {
+    background: rgba(245, 158, 11, 0.05);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    color: var(--color-warning);
+}
+
+.footer {
+    text-align: center;
+    margin-top: 3rem;
+    color: var(--color-neural);
+    font-size: 0.875rem;
+}
+
+.footer-logo {
+    width: 32px;
+    height: 32px;
+    margin: 0 0.5rem;
+    vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .title {
+        font-size: 2rem;
+    }
+    
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .card {
+        padding: 1rem;
+    }
+    
+    .results-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+}

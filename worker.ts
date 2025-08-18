@@ -1,5 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
-
+/// <reference lib="esnext" />
+//@ts-check
+//@ts-ignore
 import tasks from "./tasks.json";
 
 export interface Env {
@@ -67,6 +69,11 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
+    // Serve static assets
+    if (path.match(/\.(css|woff2|woff|svg|png|jpg|ico)$/)) {
+      return handleStaticAsset(path);
+    }
+
     // Handle webhook callbacks
     if (path === "/webhook" && request.method === "POST") {
       return handleWebhook(request, env);
@@ -82,6 +89,13 @@ export default {
       // Trigger all tasks
       ctx.waitUntil(runAllTasks(env));
       return new Response("Tasks triggered successfully");
+    }
+
+    // Handle tasks.json endpoint
+    if (path === "/tasks.json") {
+      return new Response(JSON.stringify(tasks, null, 2), {
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Handle individual task results
@@ -108,6 +122,12 @@ export default {
     ctx.waitUntil(runAllTasks(env));
   },
 } satisfies ExportedHandler<Env>;
+
+async function handleStaticAsset(path: string): Promise<Response> {
+  // This would normally serve from a static file system
+  // For now, return 404 - assets would be served by Cloudflare Workers assets
+  return new Response("Not Found", { status: 404 });
+}
 
 async function verifyWebhookSignature(
   body: string,
@@ -344,41 +364,30 @@ async function handleTaskPage(task: Task, env: Env): Promise<Response> {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${task.name} - parallel daily insights</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        @media (prefers-color-scheme: dark) {
-            body { background-color: #1a1a1a; color: #ffffff; }
-        }
-    </style>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="preload" href="/FTSystemMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/Gerstner-ProgrammRegular.woff2" as="font" type="font/woff2" crossorigin>
 </head>
-<body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-    <div class="max-w-4xl mx-auto px-4 py-8">
-        <div class="mb-8">
-            <a href="/" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">&larr; Back to all tasks</a>
-        </div>
+<body>
+    <div class="task-page">
+        <a href="/" class="breadcrumb">&larr; Back to all tasks</a>
         
-        <header class="mb-8">
-            <h1 class="text-3xl font-bold mb-2">${task.name}</h1>
-            <p class="text-gray-600 dark:text-gray-400">${task.description}</p>
+        <header class="task-header">
+            <h1 class="task-title">${task.name}</h1>
+            <p class="task-description">${task.description}</p>
         </header>
 
         ${
           taskResult
             ? `
-        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold">Latest Results</h2>
-                <div class="flex items-center gap-2">
-                    <span class="px-2 py-1 text-xs rounded-full ${
-                      taskResult.status === "completed"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                    }">
+        <div class="results-container">
+            <div class="results-header">
+                <h2 class="results-title">Latest Results</h2>
+                <div class="results-meta">
+                    <span class="status-badge status-${taskResult.status}">
                         ${taskResult.status}
                     </span>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                    <span class="timestamp">
                         Updated: ${new Date(
                           taskResult.lastUpdated
                         ).toLocaleDateString()}
@@ -391,43 +400,39 @@ async function handleTaskPage(task: Task, env: Env): Promise<Response> {
                 ? Object.entries(taskResult.result)
                     .map(
                       ([key, value]) => `
-                    <div class="mb-4">
-                        <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-2 capitalize">
+                    <div class="result-item">
+                        <div class="result-label">
                             ${key.replace(/_/g, " ")}
-                        </h3>
-                        <p class="text-gray-700 dark:text-gray-300 leading-relaxed">${String(
-                          value
-                        )}</p>
+                        </div>
+                        <div class="result-content">${String(value)}</div>
                     </div>
                 `
                     )
                     .join("")
                 : taskResult.status === "failed"
                 ? `
-                <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                    <p class="text-red-800 dark:text-red-200 font-medium">Task failed</p>
+                <div class="error-container">
+                    <div class="error-title">Task failed</div>
                     ${
                       taskResult.error
-                        ? `<p class="text-red-700 dark:text-red-300 mt-1">${taskResult.error}</p>`
+                        ? `<div class="error-message">${taskResult.error}</div>`
                         : ""
                     }
                 </div>
               `
-                : '<p class="text-gray-500 dark:text-gray-400">No results available.</p>'
+                : '<div class="no-results">No results available.</div>'
             }
         </div>
         `
             : `
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
-            <p class="text-yellow-800 dark:text-yellow-200">
-                No results available yet. Results are updated daily at 3 AM UTC.
-            </p>
+        <div class="no-results">
+            No results available yet. Results are updated daily at 3 AM UTC.
         </div>
         `
         }
         
-        <footer class="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
-            <p>Powered by <strong>parallel</strong> daily insights</p>
+        <footer class="footer">
+            <p>Powered by <img src="/dark-parallel-symbol.svg" alt="parallel" class="footer-logo"> parallel daily insights</p>
         </footer>
     </div>
 </body>
@@ -459,102 +464,86 @@ async function handleHomepage(env: Env): Promise<Response> {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>parallel daily insights</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        @media (prefers-color-scheme: dark) {
-            body { background-color: #1a1a1a; color: #ffffff; }
-        }
-    </style>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="preload" href="/FTSystemMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/Gerstner-ProgrammRegular.woff2" as="font" type="font/woff2" crossorigin>
 </head>
-<body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-    <div class="max-w-6xl mx-auto px-4 py-8">
-        <header class="text-center mb-12">
-            <h1 class="text-4xl font-bold mb-4">
-                <span class="font-black">parallel</span> daily insights
-            </h1>
-            <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto">
-                Automated daily research tasks powered by Parallel.ai. Fresh insights delivered every morning at 3 AM UTC. Tasks are defined <a href="/tasks.json">here</a>
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="/dark-parallel-symbol.svg" alt="parallel" class="logo">
+            <h1 class="title">parallel daily insights</h1>
+            <p class="subtitle">
+                Automated daily research tasks powered by Parallel.ai. Fresh insights delivered every morning at 3 AM UTC. 
+                Tasks are defined <a href="/tasks.json" style="color: var(--color-signal);">here</a>
             </p>
         </header>
 
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div class="grid">
             ${TASKS.map((task) => {
               const result = results[task.slug];
               return `
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-                    <div class="p-6">
-                        <h2 class="text-xl font-semibold mb-2">
-                            <a href="/${
-                              task.slug
-                            }" class="hover:text-blue-600 dark:hover:text-blue-400">
-                                ${task.name}
-                            </a>
-                        </h2>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">${
-                          task.description
-                        }</p>
-                        
-                        ${
-                          result
-                            ? `
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="px-2 py-1 text-xs rounded-full ${
-                                  result.status === "completed"
-                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                }">
-                                    ${result.status}
-                                </span>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">
-                                    ${new Date(
-                                      result.lastUpdated
-                                    ).toLocaleDateString()}
-                                </div>
-                            </div>
-                            ${
-                              result.status === "completed" && result.result
-                                ? `<div class="text-sm text-gray-700 dark:text-gray-300">
-                                  ${
-                                    Object.values(result.result)[0]
-                                      ? String(
-                                          Object.values(result.result)[0]
-                                        ).substring(0, 150) + "..."
-                                      : "Results available"
-                                  }
-                                 </div>`
-                                : result.status === "failed"
-                                ? `<div class="text-sm text-red-600 dark:text-red-400">
-                                   ${result.error || "Task execution failed"}
-                                 </div>`
-                                : ""
-                            }
-                        `
-                            : `
-                            <div class="text-sm text-yellow-600 dark:text-yellow-400">
-                                Awaiting first run...
-                            </div>
-                        `
-                        }
-                        
-                        <div class="mt-4">
-                            <a href="/${task.slug}" 
-                               class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
-                                View Details →
-                            </a>
+                <div class="card">
+                    <h2 class="card-title">
+                        <a href="/${task.slug}">
+                            ${task.name}
+                        </a>
+                    </h2>
+                    <p class="card-description">${task.description}</p>
+                    
+                    ${
+                      result
+                        ? `
+                        <div style="margin-bottom: 1rem;">
+                            <span class="status-badge status-${result.status}">
+                                ${result.status}
+                            </span>
+                            <span class="timestamp">
+                                ${new Date(
+                                  result.lastUpdated
+                                ).toLocaleDateString()}
+                            </span>
                         </div>
+                        ${
+                          result.status === "completed" && result.result
+                            ? `<div class="card-preview">
+                              ${
+                                Object.values(result.result)[0]
+                                  ? String(
+                                      Object.values(result.result)[0]
+                                    ).substring(0, 150) + "..."
+                                  : "Results available"
+                              }
+                             </div>`
+                            : result.status === "failed"
+                            ? `<div style="color: var(--color-error); font-size: 0.875rem;">
+                               ${result.error || "Task execution failed"}
+                             </div>`
+                            : ""
+                        }
+                    `
+                        : `
+                        <div class="status-badge status-pending">
+                            Awaiting first run...
+                        </div>
+                    `
+                    }
+                    
+                    <div style="margin-top: 1rem;">
+                        <a href="/${task.slug}" class="card-link">
+                            View Details →
+                        </a>
                     </div>
                 </div>
               `;
             }).join("")}
         </div>
         
-        <footer class="text-center mt-12">
-            <div class="text-sm text-gray-500 dark:text-gray-400 space-y-2">
+        <footer class="footer">
+            <div style="margin-bottom: 0.5rem;">
                 <p>Tasks run automatically daily at 3 AM UTC</p>
-                <p>Powered by <strong>parallel</strong> web intelligence</p>
             </div>
+            <p>Powered by <img src="/dark-parallel-symbol.svg" alt="parallel" class="footer-logo"> parallel web intelligence</p>
         </footer>
     </div>
 </body>

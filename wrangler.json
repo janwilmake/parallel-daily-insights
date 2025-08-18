@@ -5,6 +5,7 @@
   "assets": { "directory": "./" },
   "compatibility_date": "2025-01-27",
   "observability": { "logs": { "enabled": true } },
+  "route": { "custom_domain": true, "pattern": "daily.p0web.com" },
   "triggers": {
     "crons": ["0 3 * * *"]
   },
