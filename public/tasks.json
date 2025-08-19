@@ -1,9 +1,9 @@
 {
   "tasks": [
     {
-      "slug": "startup-funding-tracker",
-      "name": "Daily Startup Funding Intelligence",
-      "description": "Track significant startup funding rounds and investment trends",
+      "slug": "daily-funding-facts",
+      "name": "Daily Startup Funding Facts",
+      "description": "Track factual funding data and metrics",
       "processor": "pro",
       "task_spec": {
         "output_schema": {
@@ -11,128 +11,52 @@
           "json_schema": {
             "type": "object",
             "required": [
-              "largest_funding_round",
-              "notable_series_a",
-              "unicorn_update",
-              "sector_trending",
-              "investor_spotlight"
+              "largest_round_today",
+              "total_funding_announced",
+              "top_funded_sectors",
+              "new_unicorn_count",
+              "series_a_count"
             ],
             "properties": {
-              "largest_funding_round": {
+              "largest_round_today": {
                 "type": "string",
-                "description": "The largest funding round announced today with company name, amount, and lead investor"
+                "description": "Company name, exact funding amount in millions USD, lead investor, and company's primary business in format: 'CompanyName raised $XM led by InvestorName for [business description]'"
               },
-              "notable_series_a": {
+              "total_funding_announced": {
                 "type": "string",
-                "description": "Most interesting Series A funding with company description and investor rationale"
+                "description": "Sum of all funding rounds announced today in millions USD, format: '$X.XM across Y deals'"
               },
-              "unicorn_update": {
+              "top_funded_sectors": {
                 "type": "string",
-                "description": "Any new unicorn valuations or major valuation changes in existing unicorns"
+                "description": "Top 3 industry sectors by total funding amount today, format: '1. SectorName ($XM), 2. SectorName ($XM), 3. SectorName ($XM)'"
               },
-              "sector_trending": {
+              "new_unicorn_count": {
                 "type": "string",
-                "description": "Industry sector receiving the most funding activity today"
+                "description": "Number of companies reaching $1B+ valuation today with company names, format: 'X new unicorns: CompanyName, CompanyName' or 'No new unicorns today'"
               },
-              "investor_spotlight": {
+              "series_a_count": {
                 "type": "string",
-                "description": "Most active VC firm or notable investor moves today"
+                "description": "Total number of Series A rounds announced today, format: 'X Series A rounds totaling $XM'"
               },
-              "geographic_hotspot": {
+              "geographic_breakdown": {
                 "type": "string",
-                "description": "Geographic region with significant funding activity"
+                "description": "Top 3 countries/regions by funding amount, format: 'US: $XM, China: $XM, Europe: $XM'"
               },
-              "funding_stage_trend": {
+              "median_round_size": {
                 "type": "string",
-                "description": "Whether early-stage or late-stage funding is more active"
-              },
-              "notable_acquihire": {
-                "type": "string",
-                "description": "Any acquihires or talent acquisitions announced"
-              },
-              "failed_funding": {
-                "type": "string",
-                "description": "Companies that shut down or had funding issues"
-              },
-              "emerging_technology": {
-                "type": "string",
-                "description": "New technology categories getting investor attention"
+                "description": "Median funding round size across all announced rounds, format: '$XM median round size'"
               }
             },
             "additionalProperties": false
           }
         }
       },
-      "input": "Analyze today's startup funding landscape. Find the largest funding rounds, notable Series A investments, new unicorns, trending sectors, active investors, geographic patterns, and any company failures or pivots. Focus on actionable investment intelligence."
+      "input": "Find all startup funding rounds announced today. Calculate total amounts, count deals by stage and sector, identify largest rounds, and provide geographic breakdown. Focus on verifiable funding amounts and company details from official announcements."
     },
     {
-      "slug": "product-launch-monitor",
-      "name": "Daily Product Launch Intelligence",
-      "description": "Monitor significant product launches and feature releases across industries",
-      "processor": "pro",
-      "task_spec": {
-        "output_schema": {
-          "type": "json",
-          "json_schema": {
-            "type": "object",
-            "required": [
-              "major_product_launch",
-              "tech_feature_release",
-              "competitive_response",
-              "market_disruption_potential"
-            ],
-            "properties": {
-              "major_product_launch": {
-                "type": "string",
-                "description": "Most significant product launch today with company, product details, and target market"
-              },
-              "tech_feature_release": {
-                "type": "string",
-                "description": "Notable software feature or platform update from major tech companies"
-              },
-              "competitive_response": {
-                "type": "string",
-                "description": "Companies responding to competitor launches or market moves"
-              },
-              "market_disruption_potential": {
-                "type": "string",
-                "description": "Product launch with highest potential to disrupt existing markets"
-              },
-              "enterprise_solution": {
-                "type": "string",
-                "description": "New B2B or enterprise product launch"
-              },
-              "consumer_app_launch": {
-                "type": "string",
-                "description": "Notable consumer app or service launch"
-              },
-              "hardware_announcement": {
-                "type": "string",
-                "description": "Significant hardware product or device launch"
-              },
-              "pricing_strategy": {
-                "type": "string",
-                "description": "Interesting pricing model or strategy from new launches"
-              },
-              "partnership_enabled_launch": {
-                "type": "string",
-                "description": "Product launch enabled by strategic partnerships"
-              },
-              "beta_program_start": {
-                "type": "string",
-                "description": "Notable beta programs or early access initiatives launched"
-              }
-            },
-            "additionalProperties": false
-          }
-        }
-      },
-      "input": "Track today's most significant product launches, feature releases, and market introductions across all industries. Focus on competitive intelligence, market disruption potential, pricing strategies, and strategic implications for businesses."
-    },
-    {
-      "slug": "regulatory-impact-scanner",
-      "name": "Daily Regulatory Impact Monitor",
-      "description": "Scan for regulatory changes affecting business operations and compliance",
+      "slug": "daily-product-releases",
+      "name": "Daily Product Release Tracker",
+      "description": "Track concrete product launches and feature releases",
       "processor": "core",
       "task_spec": {
         "output_schema": {
@@ -140,55 +64,47 @@
           "json_schema": {
             "type": "object",
             "required": [
-              "new_regulation_announced",
-              "compliance_deadline",
-              "industry_most_affected",
-              "enforcement_action"
+              "enterprise_software_launches",
+              "consumer_app_releases",
+              "api_announcements",
+              "beta_programs_started"
             ],
             "properties": {
-              "new_regulation_announced": {
+              "enterprise_software_launches": {
                 "type": "string",
-                "description": "Most significant new regulation or policy announced today"
+                "description": "B2B software products launched today with company name, product name, and target use case, format: 'CompanyName launched ProductName for [use case]'"
               },
-              "compliance_deadline": {
+              "consumer_app_releases": {
                 "type": "string",
-                "description": "Upcoming compliance deadlines or implementation dates"
+                "description": "Consumer mobile apps or web services launched today, format: 'AppName by CompanyName - [core functionality] - Available on [platforms]'"
               },
-              "industry_most_affected": {
+              "api_announcements": {
                 "type": "string",
-                "description": "Industry sector facing the biggest regulatory changes"
+                "description": "New APIs or developer tools announced today, format: 'CompanyName API - [functionality] - [pricing if available]'"
               },
-              "enforcement_action": {
+              "beta_programs_started": {
                 "type": "string",
-                "description": "Major regulatory enforcement actions or penalties announced"
+                "description": "Products entering public or private beta today, format: 'ProductName by CompanyName - [description] - [how to join]'"
               },
-              "international_policy": {
+              "major_updates": {
                 "type": "string",
-                "description": "International regulatory changes affecting global business"
+                "description": "Significant updates to existing popular products, format: 'ProductName version X.X - [key new features]'"
               },
-              "data_privacy_update": {
+              "hardware_announcements": {
                 "type": "string",
-                "description": "Data privacy or cybersecurity regulation updates"
-              },
-              "environmental_compliance": {
-                "type": "string",
-                "description": "Environmental regulations or sustainability requirements"
-              },
-              "financial_regulation": {
-                "type": "string",
-                "description": "Banking, fintech, or financial services regulatory changes"
+                "description": "Physical products or devices announced today, format: 'ProductName by CompanyName - [specs] - $[price] - [availability]'"
               }
             },
             "additionalProperties": false
           }
         }
       },
-      "input": "Monitor today's regulatory developments across all sectors including new policies, compliance deadlines, enforcement actions, and international regulatory changes. Focus on business impact and operational implications."
+      "input": "Find concrete product launches, app releases, API announcements, and beta program starts from today. Focus on official company announcements with specific product details, pricing, and availability information."
     },
     {
-      "slug": "supply-chain-disruption-monitor",
-      "name": "Global Supply Chain Intelligence",
-      "description": "Track supply chain disruptions and logistics developments worldwide",
+      "slug": "daily-regulatory-updates",
+      "name": "Daily Regulatory Update Facts",
+      "description": "Track specific regulatory announcements and deadlines",
       "processor": "core",
       "task_spec": {
         "output_schema": {
@@ -196,114 +112,203 @@
           "json_schema": {
             "type": "object",
             "required": [
-              "major_disruption_event",
-              "shipping_route_impact",
-              "commodity_shortage",
-              "logistics_innovation"
+              "new_rules_announced",
+              "upcoming_deadlines",
+              "enforcement_actions",
+              "public_comment_periods"
             ],
             "properties": {
-              "major_disruption_event": {
+              "new_rules_announced": {
                 "type": "string",
-                "description": "Most significant supply chain disruption or crisis today"
+                "description": "Specific regulations or rules announced today by government agencies, format: '[Agency] announced [rule name] affecting [industry] - effective [date]'"
               },
-              "shipping_route_impact": {
+              "upcoming_deadlines": {
                 "type": "string",
-                "description": "Major shipping route delays, closures, or capacity changes"
+                "description": "Compliance deadlines within next 30 days, format: '[Regulation] deadline [date] for [affected entities]'"
               },
-              "commodity_shortage": {
+              "enforcement_actions": {
                 "type": "string",
-                "description": "Critical material or component shortages affecting industries"
+                "description": "Fines, penalties, or enforcement actions announced today, format: '[Company] fined $[amount] by [agency] for [violation]'"
               },
-              "logistics_innovation": {
+              "public_comment_periods": {
                 "type": "string",
-                "description": "New logistics technology or process improvements announced"
+                "description": "New public comment periods opened today, format: '[Agency] seeking comments on [topic] until [deadline]'"
               },
-              "port_congestion_update": {
+              "international_agreements": {
                 "type": "string",
-                "description": "Major port congestion or capacity issues worldwide"
-              },
-              "trade_route_alternative": {
-                "type": "string",
-                "description": "New trade routes or alternative supply sources being established"
-              },
-              "manufacturing_shift": {
-                "type": "string",
-                "description": "Companies reshoring or relocating manufacturing operations"
-              },
-              "energy_transport_impact": {
-                "type": "string",
-                "description": "Energy costs or availability affecting transportation and logistics"
+                "description": "International trade or regulatory agreements signed or announced today, format: '[Countries] signed [agreement name] for [purpose]'"
               }
             },
             "additionalProperties": false
           }
         }
       },
-      "input": "Analyze global supply chain disruptions, shipping delays, commodity shortages, port congestion, and logistics innovations. Focus on operational impact for businesses and alternative solutions being implemented."
+      "input": "Find specific regulatory announcements from government agencies today including new rules, enforcement actions, compliance deadlines, and public comment periods. Focus on official government sources and specific dates, amounts, and affected parties."
     },
     {
-      "slug": "ma-intelligence-tracker",
-      "name": "M&A and Corporate Development Intelligence",
-      "description": "Track merger, acquisition, and strategic corporate development activity",
-      "processor": "pro",
+      "slug": "daily-earnings-tracker",
+      "name": "Daily Earnings Results Monitor",
+      "description": "Track public company earnings releases and key financial metrics",
+      "processor": "core",
       "task_spec": {
         "output_schema": {
           "type": "json",
           "json_schema": {
             "type": "object",
             "required": [
-              "largest_deal_announced",
-              "strategic_acquisition",
-              "ipo_update",
-              "corporate_restructuring"
+              "earnings_beats",
+              "earnings_misses",
+              "revenue_surprises",
+              "guidance_changes",
+              "stock_reactions"
             ],
             "properties": {
-              "largest_deal_announced": {
+              "earnings_beats": {
                 "type": "string",
-                "description": "Largest M&A transaction announced today with value and strategic rationale"
+                "description": "Companies that beat EPS estimates today, format: 'CompanyName: actual $X.XX vs estimate $X.XX (+X%)'"
               },
-              "strategic_acquisition": {
+              "earnings_misses": {
                 "type": "string",
-                "description": "Most strategically significant acquisition for market positioning"
+                "description": "Companies that missed EPS estimates today, format: 'CompanyName: actual $X.XX vs estimate $X.XX (-X%)'"
               },
-              "ipo_update": {
+              "revenue_surprises": {
                 "type": "string",
-                "description": "IPO filings, pricing, or public debut performance"
+                "description": "Largest revenue beats or misses vs estimates, format: 'CompanyName revenue: $XM actual vs $XM estimate'"
               },
-              "corporate_restructuring": {
+              "guidance_changes": {
                 "type": "string",
-                "description": "Major corporate spinoffs, divestitures, or restructuring announcements"
+                "description": "Companies raising or lowering future guidance, format: 'CompanyName raised/lowered guidance to $X.XX from $X.XX'"
               },
-              "cross_border_deal": {
+              "stock_reactions": {
                 "type": "string",
-                "description": "Significant international or cross-border transaction"
-              },
-              "private_equity_activity": {
-                "type": "string",
-                "description": "Major private equity buyouts or portfolio company exits"
-              },
-              "hostile_takeover_attempt": {
-                "type": "string",
-                "description": "Hostile takeover bids or activist investor campaigns"
-              },
-              "deal_termination": {
-                "type": "string",
-                "description": "Major deals that were cancelled or terminated"
-              },
-              "regulatory_approval": {
-                "type": "string",
-                "description": "M&A deals receiving or denied regulatory approval"
-              },
-              "sector_consolidation": {
-                "type": "string",
-                "description": "Industry sectors experiencing consolidation activity"
+                "description": "Largest post-earnings stock moves today, format: 'CompanyName +/-X.X% after earnings'"
               }
             },
             "additionalProperties": false
           }
         }
       },
-      "input": "Monitor today's merger and acquisition activity, IPOs, corporate restructuring, private equity deals, and strategic corporate developments. Focus on deal value, strategic rationale, regulatory implications, and market consolidation trends."
+      "input": "Find all public company earnings releases today. Compare actual results to analyst estimates for EPS and revenue. Track guidance changes and immediate stock price reactions."
+    },
+    {
+      "slug": "daily-patent-filings",
+      "name": "Daily Patent and IP Activity",
+      "description": "Monitor patent filings and intellectual property developments",
+      "processor": "core",
+      "task_spec": {
+        "output_schema": {
+          "type": "json",
+          "json_schema": {
+            "type": "object",
+            "required": [
+              "notable_patent_filings",
+              "patent_grants",
+              "ip_litigation",
+              "trademark_applications"
+            ],
+            "properties": {
+              "notable_patent_filings": {
+                "type": "string",
+                "description": "Significant patent applications published today from major companies, format: 'CompanyName filed patent for [technology] - Application #XXXXXXX'"
+              },
+              "patent_grants": {
+                "type": "string",
+                "description": "Important patents granted today, format: 'Patent #XXXXXXX granted to CompanyName for [technology description]'"
+              },
+              "ip_litigation": {
+                "type": "string",
+                "description": "New patent infringement lawsuits or IP disputes filed today, format: 'CompanyA sued CompanyB over Patent #XXXXXXX for [technology]'"
+              },
+              "trademark_applications": {
+                "type": "string",
+                "description": "Notable trademark applications filed today, format: 'CompanyName applied for trademark on [name/logo] for [product category]'"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "input": "Search patent databases and IP news for patent applications published today, patents granted, new IP litigation, and trademark filings from major companies."
+    },
+    {
+      "slug": "daily-executive-moves",
+      "name": "Daily Executive Leadership Changes",
+      "description": "Track C-level appointments, departures, and board changes",
+      "processor": "core",
+      "task_spec": {
+        "output_schema": {
+          "type": "json",
+          "json_schema": {
+            "type": "object",
+            "required": [
+              "ceo_appointments",
+              "cto_cfo_changes",
+              "board_appointments",
+              "executive_departures"
+            ],
+            "properties": {
+              "ceo_appointments": {
+                "type": "string",
+                "description": "New CEO appointments announced today, format: 'CompanyName appointed PersonName as CEO, replacing PreviousCEO, effective [date]'"
+              },
+              "cto_cfo_changes": {
+                "type": "string",
+                "description": "CTO, CFO, and other C-level appointments, format: 'CompanyName hired PersonName as [title] from [previous company]'"
+              },
+              "board_appointments": {
+                "type": "string",
+                "description": "New board of directors appointments, format: 'PersonName joined CompanyName board, bringing [expertise area]'"
+              },
+              "executive_departures": {
+                "type": "string",
+                "description": "Executive departures or resignations announced today, format: 'PersonName left role as [title] at CompanyName after X years'"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "input": "Find executive leadership changes announced today including CEO appointments, C-level hires, board appointments, and departures from public and private companies."
+    },
+    {
+      "slug": "daily-cybersecurity-incidents",
+      "name": "Daily Cybersecurity Incident Monitor",
+      "description": "Track disclosed security breaches and cybersecurity developments",
+      "processor": "core",
+      "task_spec": {
+        "output_schema": {
+          "type": "json",
+          "json_schema": {
+            "type": "object",
+            "required": [
+              "data_breaches_disclosed",
+              "ransomware_attacks",
+              "security_vulnerabilities",
+              "incident_response_updates"
+            ],
+            "properties": {
+              "data_breaches_disclosed": {
+                "type": "string",
+                "description": "Data breaches disclosed today, format: 'CompanyName disclosed breach affecting X users/records, discovered [date]'"
+              },
+              "ransomware_attacks": {
+                "type": "string",
+                "description": "Ransomware incidents reported today, format: 'CompanyName hit by [ransomware group], operations [status]'"
+              },
+              "security_vulnerabilities": {
+                "type": "string",
+                "description": "Critical security vulnerabilities announced today, format: 'CVE-XXXX-XXXX in [software] allows [attack type], patch [availability]'"
+              },
+              "incident_response_updates": {
+                "type": "string",
+                "description": "Updates on previously reported incidents, format: 'CompanyName: [incident status update] - X% operations restored'"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "input": "Monitor cybersecurity incident disclosures, ransomware attacks, critical vulnerabilities, and incident response updates from today. Focus on officially disclosed information with specific impact details."
     }
   ]
 }
