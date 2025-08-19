@@ -1,0 +1,309 @@
+{
+  "tasks": [
+    {
+      "slug": "startup-funding-tracker",
+      "name": "Daily Startup Funding Intelligence",
+      "description": "Track significant startup funding rounds and investment trends",
+      "processor": "pro",
+      "task_spec": {
+        "output_schema": {
+          "type": "json",
+          "json_schema": {
+            "type": "object",
+            "required": [
+              "largest_funding_round",
+              "notable_series_a",
+              "unicorn_update",
+              "sector_trending",
+              "investor_spotlight"
+            ],
+            "properties": {
+              "largest_funding_round": {
+                "type": "string",
+                "description": "The largest funding round announced today with company name, amount, and lead investor"
+              },
+              "notable_series_a": {
+                "type": "string",
+                "description": "Most interesting Series A funding with company description and investor rationale"
+              },
+              "unicorn_update": {
+                "type": "string",
+                "description": "Any new unicorn valuations or major valuation changes in existing unicorns"
+              },
+              "sector_trending": {
+                "type": "string",
+                "description": "Industry sector receiving the most funding activity today"
+              },
+              "investor_spotlight": {
+                "type": "string",
+                "description": "Most active VC firm or notable investor moves today"
+              },
+              "geographic_hotspot": {
+                "type": "string",
+                "description": "Geographic region with significant funding activity"
+              },
+              "funding_stage_trend": {
+                "type": "string",
+                "description": "Whether early-stage or late-stage funding is more active"
+              },
+              "notable_acquihire": {
+                "type": "string",
+                "description": "Any acquihires or talent acquisitions announced"
+              },
+              "failed_funding": {
+                "type": "string",
+                "description": "Companies that shut down or had funding issues"
+              },
+              "emerging_technology": {
+                "type": "string",
+                "description": "New technology categories getting investor attention"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "input": "Analyze today's startup funding landscape. Find the largest funding rounds, notable Series A investments, new unicorns, trending sectors, active investors, geographic patterns, and any company failures or pivots. Focus on actionable investment intelligence."
+    },
+    {
+      "slug": "product-launch-monitor",
+      "name": "Daily Product Launch Intelligence",
+      "description": "Monitor significant product launches and feature releases across industries",
+      "processor": "pro",
+      "task_spec": {
+        "output_schema": {
+          "type": "json",
+          "json_schema": {
+            "type": "object",
+            "required": [
+              "major_product_launch",
+              "tech_feature_release",
+              "competitive_response",
+              "market_disruption_potential"
+            ],
+            "properties": {
+              "major_product_launch": {
+                "type": "string",
+                "description": "Most significant product launch today with company, product details, and target market"
+              },
+              "tech_feature_release": {
+                "type": "string",
+                "description": "Notable software feature or platform update from major tech companies"
+              },
+              "competitive_response": {
+                "type": "string",
+                "description": "Companies responding to competitor launches or market moves"
+              },
+              "market_disruption_potential": {
+                "type": "string",
+                "description": "Product launch with highest potential to disrupt existing markets"
+              },
+              "enterprise_solution": {
+                "type": "string",
+                "description": "New B2B or enterprise product launch"
+              },
+              "consumer_app_launch": {
+                "type": "string",
+                "description": "Notable consumer app or service launch"
+              },
+              "hardware_announcement": {
+                "type": "string",
+                "description": "Significant hardware product or device launch"
+              },
+              "pricing_strategy": {
+                "type": "string",
+                "description": "Interesting pricing model or strategy from new launches"
+              },
+              "partnership_enabled_launch": {
+                "type": "string",
+                "description": "Product launch enabled by strategic partnerships"
+              },
+              "beta_program_start": {
+                "type": "string",
+                "description": "Notable beta programs or early access initiatives launched"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "input": "Track today's most significant product launches, feature releases, and market introductions across all industries. Focus on competitive intelligence, market disruption potential, pricing strategies, and strategic implications for businesses."
+    },
+    {
+      "slug": "regulatory-impact-scanner",
+      "name": "Daily Regulatory Impact Monitor",
+      "description": "Scan for regulatory changes affecting business operations and compliance",
+      "processor": "core",
+      "task_spec": {
+        "output_schema": {
+          "type": "json",
+          "json_schema": {
+            "type": "object",
+            "required": [
+              "new_regulation_announced",
+              "compliance_deadline",
+              "industry_most_affected",
+              "enforcement_action"
+            ],
+            "properties": {
+              "new_regulation_announced": {
+                "type": "string",
+                "description": "Most significant new regulation or policy announced today"
+              },
+              "compliance_deadline": {
+                "type": "string",
+                "description": "Upcoming compliance deadlines or implementation dates"
+              },
+              "industry_most_affected": {
+                "type": "string",
+                "description": "Industry sector facing the biggest regulatory changes"
+              },
+              "enforcement_action": {
+                "type": "string",
+                "description": "Major regulatory enforcement actions or penalties announced"
+              },
+              "international_policy": {
+                "type": "string",
+                "description": "International regulatory changes affecting global business"
+              },
+              "data_privacy_update": {
+                "type": "string",
+                "description": "Data privacy or cybersecurity regulation updates"
+              },
+              "environmental_compliance": {
+                "type": "string",
+                "description": "Environmental regulations or sustainability requirements"
+              },
+              "financial_regulation": {
+                "type": "string",
+                "description": "Banking, fintech, or financial services regulatory changes"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "input": "Monitor today's regulatory developments across all sectors including new policies, compliance deadlines, enforcement actions, and international regulatory changes. Focus on business impact and operational implications."
+    },
+    {
+      "slug": "supply-chain-disruption-monitor",
+      "name": "Global Supply Chain Intelligence",
+      "description": "Track supply chain disruptions and logistics developments worldwide",
+      "processor": "core",
+      "task_spec": {
+        "output_schema": {
+          "type": "json",
+          "json_schema": {
+            "type": "object",
+            "required": [
+              "major_disruption_event",
+              "shipping_route_impact",
+              "commodity_shortage",
+              "logistics_innovation"
+            ],
+            "properties": {
+              "major_disruption_event": {
+                "type": "string",
+                "description": "Most significant supply chain disruption or crisis today"
+              },
+              "shipping_route_impact": {
+                "type": "string",
+                "description": "Major shipping route delays, closures, or capacity changes"
+              },
+              "commodity_shortage": {
+                "type": "string",
+                "description": "Critical material or component shortages affecting industries"
+              },
+              "logistics_innovation": {
+                "type": "string",
+                "description": "New logistics technology or process improvements announced"
+              },
+              "port_congestion_update": {
+                "type": "string",
+                "description": "Major port congestion or capacity issues worldwide"
+              },
+              "trade_route_alternative": {
+                "type": "string",
+                "description": "New trade routes or alternative supply sources being established"
+              },
+              "manufacturing_shift": {
+                "type": "string",
+                "description": "Companies reshoring or relocating manufacturing operations"
+              },
+              "energy_transport_impact": {
+                "type": "string",
+                "description": "Energy costs or availability affecting transportation and logistics"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "input": "Analyze global supply chain disruptions, shipping delays, commodity shortages, port congestion, and logistics innovations. Focus on operational impact for businesses and alternative solutions being implemented."
+    },
+    {
+      "slug": "ma-intelligence-tracker",
+      "name": "M&A and Corporate Development Intelligence",
+      "description": "Track merger, acquisition, and strategic corporate development activity",
+      "processor": "pro",
+      "task_spec": {
+        "output_schema": {
+          "type": "json",
+          "json_schema": {
+            "type": "object",
+            "required": [
+              "largest_deal_announced",
+              "strategic_acquisition",
+              "ipo_update",
+              "corporate_restructuring"
+            ],
+            "properties": {
+              "largest_deal_announced": {
+                "type": "string",
+                "description": "Largest M&A transaction announced today with value and strategic rationale"
+              },
+              "strategic_acquisition": {
+                "type": "string",
+                "description": "Most strategically significant acquisition for market positioning"
+              },
+              "ipo_update": {
+                "type": "string",
+                "description": "IPO filings, pricing, or public debut performance"
+              },
+              "corporate_restructuring": {
+                "type": "string",
+                "description": "Major corporate spinoffs, divestitures, or restructuring announcements"
+              },
+              "cross_border_deal": {
+                "type": "string",
+                "description": "Significant international or cross-border transaction"
+              },
+              "private_equity_activity": {
+                "type": "string",
+                "description": "Major private equity buyouts or portfolio company exits"
+              },
+              "hostile_takeover_attempt": {
+                "type": "string",
+                "description": "Hostile takeover bids or activist investor campaigns"
+              },
+              "deal_termination": {
+                "type": "string",
+                "description": "Major deals that were cancelled or terminated"
+              },
+              "regulatory_approval": {
+                "type": "string",
+                "description": "M&A deals receiving or denied regulatory approval"
+              },
+              "sector_consolidation": {
+                "type": "string",
+                "description": "Industry sectors experiencing consolidation activity"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "input": "Monitor today's merger and acquisition activity, IPOs, corporate restructuring, private equity deals, and strategic corporate developments. Focus on deal value, strategic rationale, regulatory implications, and market consolidation trends."
+    }
+  ]
+}
