@@ -43,5 +43,3 @@ Recurring Tasks Using cronjobs and KV
 - Using same styleguide
 - Shows each task result property as text with its basis confidence and references.
 - Use https://www.google.com/s2/favicons?domain={hostname}&sz=32 to use icons for each reference.
-
-<!-- previous specresult: https://letmeprompt.com/recurring-tasks-us-b0nl4w0 -->
