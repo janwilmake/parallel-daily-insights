@@ -24,6 +24,8 @@ Another mistake it made is thinking it could request a lot of scattered informat
 
 ## Result
 
-You can see the result at https://daily.p0web.com. After the 25th of august 2025 the results should be better due to improved task specification and schedule.
+You can see the result at https://daily.p0web.com. After the 25th of august 2025 the results should be better due to improved task specification and schedule. I also added a [remix button](https://github.com/janwilmake/forgithub.remix) button in the bottom corner that allows easily giving this worker your own twist. Clicking this button will take the spec allow you to generate a variation of it. Give it a spin!
+
+[![](https://remix.forgithub.com/badge)](https://remix.forgithub.com/janwilmake/parallel-daily-insights)
 
 > This app is part of the [parallel cookbook](https://github.com/parallel-web/parallel-cookbook)
