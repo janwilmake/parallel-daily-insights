@@ -1,5 +1,8 @@
 # Building an active monitoring service for public data
 
+> [!WARNING]
+> Moved to [official location](https://github.com/parallel-web/parallel-cookbook)
+
 A very interesting pattern for tasks is doing tasks on a schedule. In this recipe it is shown how to schedule daily tasks, store results, and making them publicly available in a feed.
 
 Practially, I've used Cloudflare Cron Triggers, Cloudflare KV, and Parallel Tasks with Webhooks. Tasks to be done daily were hardcoded in [tasks.json](tasks.json)
